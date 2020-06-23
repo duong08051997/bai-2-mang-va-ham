@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Đăng kí người dùng</title>
+    <style>
+        .error {
+            color: #FF0000;
+        }
+        table{
+            border-collapse: collapse;
+            width: 100%;
+        }
+        td, th{
+            border: solid 1px #ccc;
+        }
+        form{
+            width: 550px;
+        }
+    </style>
+</head>
+<body>
+<?php
+function loadRegistrations($filename)
+{
+    $jsonData = file_get_contents($filename);
+    $arr_data = json_decode($jsonData, true);
+    return $arr_data;
+}
+
+function saveDataJSON($filename, $name, $email, $phone)
+{
+    try {
+        $contact = array(
+            "name" => $name,
+            "email" => $email,
+            "phone" => $phone,
+        );
+        $arr_data = loadRegistrations($filename);
+        array_push($arr_data, $contact);
+        $jsonData = json_encode($arr_data, JSON_PRETTY_PRINT);
+        file_put_contents($filename, $jsonData);
+        echo "Lưu dữ liệu thành công";
+
+    } catch (Exception $e) {
+        echo "lỗi: ", $e->getMessage(), "\n";
+    }
+}
+
+$nameErr = NULL;
+$emailErr = NULL;
+$phoneErr = NULL;
+$name = NULL;
+$email = NULL;
+$phone = NULL;
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $name = $_POST["name"];
+    $email = $_POST["email"];
+    $phone = $_POST["phone"];
+    $has_error = false;
+
+    if (empty($name)) {
+        $nameErr ="Tên đăng nhập không được dể trống !";
+        $has_error = true;
+    }
+    if (empty($email)) {
+        $emailErr = "email không được để trống";
+        $has_error = true;
+    }else{
+        if (!filter_var($email,FILTER_VALIDATE_EMAIL)) {
+            $emailErr = "Định dạng email sai (____@gmail.com)";
+            $has_error = true;
+        }
+    }
+    if (empty($phone)) {
+        $phoneErr ="số địện thoại không được để trống!";
+        $has_error = true;
+    }
+    if ($has_error === false) {
+        saveDataJSON("data.json",$name,$email,$phone);
+        $name =NULL;
+        $email =NULL;
+        $phone =NULL;
+    }
+}
+
+?>
+<h2>Form đăng kí</h2>
+<form method="post">
+    Name: <input type="text" name="name" value="<?php echo $name; ?>">
+        <span class="error">* <?php echo $nameErr;?></span><br/>
+    Email: <input type="text" name="email" value="<?php echo $email; ?>">
+    <span class="error">* <?php echo $emailErr;?></span><br/>
+    Phone: <input type="text" name="phone" value="<?php echo $phone; ?>">
+    <span class="error">* <?php echo $phoneErr;?></span><br/>
+    <input type="submit"  name="submit" value="Register">
+    <p><span class="error">* require filed.</span></p>
+</form>
+<?php
+$registrations = loadRegistrations("data.json");
+?>
+<h2> list đăng kí</h2>
+<table>
+    <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Phone</th>
+    </tr>
+    <?php foreach ($registrations as $registration): ?>
+    <tr>
+        <td><?php $registration['name'];?></td>
+        <td><?php $registration['email'];?></td>
+        <td><?php $registration['phone'];?></td>
+    </tr>
+    <?php endforeach;?>
+</table>
+</body>
+</html>
