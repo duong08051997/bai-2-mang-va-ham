@@ -48,8 +48,8 @@ function saveDataJSON($filename, $name, $email, $phone)
     } catch (Exception $e) {
         echo "lỗi: ", $e->getMessage(), "\n";
     }
-}
 
+}
 $nameErr = NULL;
 $emailErr = NULL;
 $phoneErr = NULL;
@@ -112,9 +112,9 @@ $registrations = loadRegistrations("data.json");
     </tr>
     <?php foreach ($registrations as $registration): ?>
     <tr>
-        <td><?php $registration['name'];?></td>
-        <td><?php $registration['email'];?></td>
-        <td><?php $registration['phone'];?></td>
+        <td><?php echo $registration['name'];?></td>
+        <td><?php echo $registration['email'];?></td>
+        <td><?php echo $registration['phone'];?></td>
     </tr>
     <?php endforeach;?>
 </table>
